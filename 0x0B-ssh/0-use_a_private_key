@@ -1,6 +1,4 @@
-#!/usr/bin/env bash
-# Bash script that uses ssh to connect to server using private key ~/.ssh/school with user ubuntu
-# Only using ssh single-character flags, not using -l
+#!/bin/bash
+ssh -i ~/.ssh/school ubuntu@10.12.12.1
 
-ssh -i ~/.ssh/school ubuntu@8.8.8.8
 
