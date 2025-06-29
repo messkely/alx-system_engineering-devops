@@ -1,4 +1,5 @@
-Host *
-    IdentityFile ~/.ssh/school
-    PasswordAuthentication no
-
+Host alx
+  HostName fcbefc8e1256.7a057e02.alx-cod.online
+  User ubuntu
+  IdentityFile ~/.ssh/school
+  PasswordAuthentication no
