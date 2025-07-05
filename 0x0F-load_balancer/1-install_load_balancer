@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Script that installs and configures HAproxy load balancer
+
+# Update package list
+apt-get update -y
+
+# Install HAproxy
+apt-get install haproxy -y
+
+# Enable HAproxy to be started by init script
+echo "ENABLED=1" > /etc/default/haproxy
+
+# Backup original configuration
+cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak
+
+# Create HAproxy configuration
+cat > /etc/haproxy/haproxy.cfg << 'EOF'
+global
+    log 127.0.0.1:514 local0
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+defaults
+    log global
+    mode http
+    option httplog
+    option dontlognull
+    timeout connect 5000
+    timeout client 50000
+    timeout server 50000
+    errorfile 400 /etc/haproxy/errors/400.http
+    errorfile 403 /etc/haproxy/errors/403.http
+    errorfile 408 /etc/haproxy/errors/408.http
+    errorfile 500 /etc/haproxy/errors/500.http
+    errorfile 502 /etc/haproxy/errors/502.http
+    errorfile 503 /etc/haproxy/errors/503.http
+    errorfile 504 /etc/haproxy/errors/504.http
+
+frontend web_frontend
+    bind *:80
+    default_backend web_servers
+
+backend web_servers
+    balance roundrobin
+    option httpchk GET /
+    server web-01 [WEB-01-IP]:80 check
+    server web-02 [WEB-02-IP]:80 check
+EOF
+
+# Note: You need to replace [WEB-01-IP] and [WEB-02-IP] with actual IP addresses
+# For example, if your web servers are at 34.198.248.145 and 54.89.38.100:
+# sed -i 's/\[WEB-01-IP\]/34.198.248.145/g' /etc/haproxy/haproxy.cfg
+# sed -i 's/\[WEB-02-IP\]/54.89.38.100/g' /etc/haproxy/haproxy.cfg
+
+# Enable and start HAproxy
+systemctl enable haproxy
+systemctl start haproxy
+
+# Restart HAproxy to apply configuration
+systemctl restart haproxy
+
+# Check HAproxy status
+systemctl status haproxy
