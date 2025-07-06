@@ -1,14 +1,43 @@
 #!/usr/bin/env bash
-# Installing Nginx and redirection
+# Script that configures a new Ubuntu machine with custom HTTP response header
+# shellcheck disable=SC2154
 
-apt-get -y update
-apt-get -y install nginx
-ufw allow 'Nginx HTTP'
+# Update package list
+apt-get update -y
+
+# Install nginx
+apt-get install nginx -y
+
+# Create a simple HTML page with "Hello World!"
 echo "Hello World!" > /var/www/html/index.html
-echo "Ceci n'est pas une page" > /var/www/html/error_404.html
+
+# Get the hostname of the server
+hostname=$(hostname)
+
+# Configure nginx with custom header, redirect, and 404 page
+# Add custom header configuration to the server block
+sed -i "/listen 80 default_server;/a\\
+\\tadd_header X-Served-By \$hostname;\\
+\\tlocation /redirect_me {\\
+\\t\\treturn 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;\\
+\\t}\\
+\\n\\terror_page 404 /404.html;\\
+\\tlocation = /404.html {\\
+\\t\\troot /var/www/html;\\
+\\t\\tinternal;\\
+\\t}" /etc/nginx/sites-available/default
+
+# Create custom 404 page
+echo "Ceci n'est pas une page" > /var/www/html/404.html
+
+# Test nginx configuration
+nginx -t
+
+# Start nginx service
 service nginx start
-sed -i "25i location /redirect_me {\n return 301 https://www.youtube.com/watch?v=v5nfmtFzvvk;\n}\n" /etc/nginx/sites-available/default
-sed -i "28i error_page 404 /error_404.html;\n location = /error_404.html {\n root /var/www/html;\n internal;\n}\n" /etc/nginx/sites-available/default
-sed -i "33i\\
-\tadd_header X-Served-By \$hostname;" /etc/nginx/sites-available/default
+
+# Restart nginx to apply changes
 service nginx restart
+
+# Ensure nginx is enabled to start on boot
+update-rc.d nginx enable
