@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Installing Nginx
+link="https:\/\/www.youtube.com\/watch?v=v5nfmtFzvvk"
+new="server_name_;\n\trewrite ^/redirect_me/$ $link permanent;"
+# new="location \/redirect_me\/ {\n\treturn 301 $link;\n}"
+
+apt-get -y update
+apt-get -y install nginx
+ufw allow 'Nginx HTTP'
+echo "Hello World!" > /var/www/html/index.html
+sed -i "s|server_name_;|$new|" /etc/nginx/sites-available/default
+# sed -i "s/server_name_;/$conf/" /etc/nginx/sites-enabled/default
+# sed -i "s|location \/redirect_me\/ {.*}|$new|" /etc/nginx/sites-available/default
+sed -i '/server {/a \ location /redirect_me {\n return 301 https://www.youtube.com/watch?v=v5nfmtFzvvk; }' /etc/nginx/sites-available/default
+service nginx start
