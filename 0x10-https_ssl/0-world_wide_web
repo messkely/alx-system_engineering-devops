@@ -7,17 +7,17 @@ get_subdomain_info() {
     local subdomain="$2"
     local full_domain="${subdomain}.${domain}"
     
-    # Use dig to get DNS information and extract record type and destination
-    local dig_output
-    dig_output=$(dig "$full_domain" | grep -A1 'ANSWER SECTION:' | tail -n1)
+    # Use dig to get DNS information and parse it
+    local result
+    result=$(dig "$full_domain" | grep -E "^${full_domain}.*IN.*" | head -n1)
     
-    if [[ -n "$dig_output" ]]; then
+    if [[ -n "$result" ]]; then
         local record_type
         local destination
         # shellcheck disable=SC2086
-        record_type=$(echo $dig_output | awk '{print $4}')
+        record_type=$(echo $result | awk '{print $4}')
         # shellcheck disable=SC2086
-        destination=$(echo $dig_output | awk '{print $5}')
+        destination=$(echo $result | awk '{print $5}')
         
         echo "The subdomain $subdomain is a $record_type record and points to $destination"
     fi
