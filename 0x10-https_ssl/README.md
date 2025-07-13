@@ -15,12 +15,13 @@ By the end of this project, you should be able to explain:
 
 ### General
 - Allowed editors: `vi`, `vim`, `emacs`
-- All files interpreted on Ubuntu 16.04 LTS
-- All files should end with a new line
-- All Bash script files must be executable
-- Bash scripts must pass Shellcheck (version 0.3.7) without errors
-- First line of all Bash scripts: `#!/usr/bin/env bash`
-- Second line of all Bash scripts: comment explaining the script's purpose
+- All your files will be interpreted on Ubuntu 16.04 LTS
+- All your files should end with a new line
+- A `README.md` file, at the root of the folder of the project, is mandatory
+- All your Bash script files must be executable
+- Your Bash script must pass `Shellcheck` (version `0.3.7`) without any error
+- The first line of all your Bash scripts should be exactly `#!/usr/bin/env bash`
+- The second line of all your Bash scripts should be a comment explaining what is the script doing
 
 ### Infrastructure
 - **Load Balancer**: 751420-lb-01
@@ -56,6 +57,7 @@ Configure DNS subdomains and create a Bash script to audit subdomain information
 - Use `awk` and at least one Bash function
 - Ignore shellcheck case SC2086
 - Output format: `The subdomain [SUB_DOMAIN] is a [RECORD_TYPE] record and points to [DESTINATION]`
+- Must follow all general requirements (executable, shellcheck clean, proper shebang and comment)
 
 #### Usage Examples:
 ```bash
@@ -96,12 +98,21 @@ Configure HAproxy for SSL termination to handle encrypted HTTPS traffic.
 
 ## Implementation Steps
 
-### Step 1: DNS Configuration
+### Step 1: Make Script Executable
+```bash
+# Make the script executable (required)
+chmod +x 0-world_wide_web
+
+# Verify script passes shellcheck
+shellcheck 0-world_wide_web
+```
+
+### Step 2: DNS Configuration
 1. Configure your domain registrar/DNS provider
 2. Add A records for all required subdomains
 3. Point them to respective server IPs
 
-### Step 2: SSL Certificate Generation
+### Step 2: DNS Configuration
 ```bash
 # Install certbot
 sudo apt-get update
@@ -116,7 +127,7 @@ sudo cat /etc/letsencrypt/live/www.yourdomain.com/fullchain.pem \
     > /etc/ssl/certs/www.yourdomain.com.pem
 ```
 
-### Step 3: HAproxy Configuration
+### Step 3: SSL Certificate Generation
 ```bash
 # Install HAproxy 1.5+
 sudo apt-get install haproxy
@@ -128,7 +139,7 @@ sudo cp 1-haproxy_ssl_termination /etc/haproxy/haproxy.cfg
 sudo service haproxy restart
 ```
 
-### Step 4: Web Server Configuration
+### Step 4: HAproxy Configuration
 Ensure your web servers serve content containing "ALX" at the root path.
 
 ## Testing
